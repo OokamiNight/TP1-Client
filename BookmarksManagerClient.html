@@ -32,8 +32,33 @@
             <div class="array-container">
                 <div class="header-container">
                     <div class="header-contacts-container">
-                        <div> Nom</div>
-                        <div>Catégorie</div>
+                        <div>
+                            Nom
+                            <!-- Sort -->
+                            <button id="showSortNameCmd"
+                                    tooltip="Ordre des bookmarks" tooltip-position="right">
+                                <span class="glyphicon glyphicon-list"></span>
+                            </button>
+                            <!-- Search Bar-->
+                            <button id="showSearchBarName"
+                                    tooltip="Recherche par Nom" tooltip-position="right">
+                                <span class="glyphicon glyphicon-search"></span>
+                            </button>
+                        </div>
+                        
+                        <div>
+                            Catégorie
+                            <!-- Sort -->
+                            <button id="showSortCategoryCmd"
+                                    tooltip="Ordre des bookmarks" tooltip-position="right">
+                                <span class="glyphicon glyphicon-list"></span>
+                            </button>
+                            <!-- Search Bar-->
+                            <button id="showSearchBarCategory"
+                                    tooltip="Recherche par Catégorie" tooltip-position="right">
+                                <span class="glyphicon glyphicon-search"></span>
+                            </button>
+                        </div>
                         <div>URL</div>
                         <div>
                             <button id="showAddBookmarkFormCmd"
@@ -73,6 +98,37 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Search Bar Name -->
+                <div class="form-container">
+                    <div class="form-contact-container" id="searchFormName">
+                        <div>
+                            <input type="text" id="infoName" placeholder="Nom" class="form-control"/>
+                            <button id="searchName" tooltip="Rechercher" tooltip-position="left">
+                                <span class="glyphicon glyphicon glyphicon-ok"></span>
+                            </button>
+                            <button id="cancelCmd" tooltip="Annuler" tooltip-position="left">
+                                <span  class="glyphicon glyphicon-repeat"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Bar Category -->
+                <div class="form-container">
+                    <div class="form-contact-container" id="searchFormCategory">
+                        <div>
+                            <input type="text" id="infoCategory" placeholder="Catégorie" class="form-control"/>
+                            <button id="searchCategory" tooltip="Rechercher" tooltip-position="left">
+                                <span class="glyphicon glyphicon glyphicon-ok"></span>
+                            </button>
+                            <button id="cancelCmd" tooltip="Annuler" tooltip-position="left">
+                                <span  class="glyphicon glyphicon-repeat"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="contact-list-scroll-containter">
                     <div class="contact-list-container" id="bookmarkList">
                         <!-- La liste de bookmarks sera injectée ici par 
@@ -100,6 +156,8 @@
 
             let editMode = false;
             let addMode = false;
+            let searchName = false;
+            let searchCategory =false;
 
             // objet d'automatisation de la validation
             let validationProvider;
@@ -114,6 +172,17 @@
                 $('#addBookmarkCmd').click(addBookmark);
                 $('#showAddBookmarkFormCmd').click(showAddBookmarkForm);
 
+                //Sort
+                $('#showSortCategoryCmd').click(getBookmarksSortByCategory);
+                $('#showSortNameCmd').click(getBookmarksSortByName);
+
+                //Search Bar
+                $('#showSearchBarName').click(showSearchBarNameForm);
+                $('#searchName').click(SearchByName);
+                
+                $('#showSearchBarCategory').click(showSearchBarCategoryForm);
+                $('#searchCategory').click(SearchByCategory);
+                
                 //Modify
                 $('#modifyBookmarkCmd').click(modifyBookmark);
 
@@ -157,11 +226,9 @@
 
             function validate_Name(){
                 let TBX_Name = document.getElementById("Name");
-
+                
                 if (TBX_Name.value === "")
                     return "Nom manquant";
-
-                return "";
             }
 
             function validate_Category(){
@@ -192,7 +259,8 @@
             function eraseForm() {
                 addMode = false;
                 editMode = false;
-         
+                searchName = false;
+                searchCategory =false;
                 resetValidation();
 
                 // rétablir la couleur de fond de toutes les rangées
@@ -200,6 +268,8 @@
 
                 // masquer le formulaire de saisie/modification de bookmark
                 $('#bookmarkForm').hide(400);
+                $('#searchFormName').hide();
+                $('#searchFormCategory').hide();
 
                 // Rétablir la visibilité par défaut des boutons
                 $('#addBookmarkCmd').show();
@@ -220,6 +290,23 @@
             function getBookmarks() {
                 webAPI_getBookmarks(updateBookmarkList, insertErrorStatus);
             }
+            function getBookmarksSortByName(){
+                webAPI_getBookmarks(sortByName, insertErrorStatus);
+            }
+            function getBookmarksSortByCategory(){
+                webAPI_getBookmarks(sortByCategory, insertErrorStatus);
+            }
+            //#endregion
+
+            //#region Sort (Name & Category)
+            function sortByCategory(bookmarks){
+
+                webAPI_sortBookmark('category', updateBookmarkList, insertErrorStatus);
+            }
+            function sortByName(bookmarks){
+               webAPI_sortBookmark('name', updateBookmarkList, insertErrorStatus);
+            }
+
             //#endregion
             
             //#region Affichage de formulaire
@@ -230,6 +317,16 @@
                 $('#addBookmarkCmd').show();
                 $('#bookmarkForm').show(400);
                 $('#showAddBookmarkFormCmd').hide();
+            }
+
+            // Afficher le formulaire pour la saisie de recherche
+            function showSearchBarNameForm(){
+                searchName = true;
+                $('#searchFormName').show();
+            }
+            function showSearchBarCategoryForm(){
+                searchCategory = true;
+                $('#searchFormCategory').show();
             }
 
 
@@ -307,6 +404,12 @@
                 });
             }
             
+            function SearchByName(){
+                webAPI_searchIncomplete($('#infoName').val(), updateBookmarkList, insertErrorStatus);
+            }
+            function SearchByCategory(){
+                webAPI_searchCategory($('#infoCategory').val(), updateBookmarkList, insertErrorStatus);
+            }
             //#endregion
 
             // Sur le survol d'une rangée, faire apparaître les boutons edit et delete
@@ -353,6 +456,7 @@
             // Rafraichir la liste des bookmarks
             // paramètre bookmarks: tableau d'objets bookmark
             function updateBookmarkList(bookmarks) {
+
                 eraseForm();
                 var oddRow = true;
                 // effacer le tableau affichant la liste de bookmarks
@@ -360,7 +464,8 @@
 
                 // pour tous les bookmarks du tableau bookmarks
                 bookmarks.forEach(bookmark => { // créer une nouvelle rangée
-
+                    console.log("Hello")
+                    console.log(bookmark);
                     // déterminer la couleur de la rangée
                     let bgColorRow = "row_" + bookmark.Id + (oddRow?  " oddRow": " evenRow") + " cell "  ;
 

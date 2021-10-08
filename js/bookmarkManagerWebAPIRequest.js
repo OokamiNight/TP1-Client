@@ -33,6 +33,81 @@ function webAPI_getBookmark( id, successCallBack, errorCallBack) {
         }
     });
 }
+function webAPI_getBookmark(id, successCallBack, errorCallBack) {
+    $.ajax({
+        url: apiBaseURL + "/" + id,
+        type: 'GET',
+        contentType:'text/plain',
+        data:{},
+        success: Bookmark => { successCallBack(Bookmark); console.log("webAPI_getBookmark - success");},
+        error: function(jqXHR, textStatus, errorThrown) {
+            errorCallBack(errorThrown);
+            console.log("webAPI_getBookmark - error");
+        }
+    });
+}
+function webAPI_sortBookmark( key, successCallBack, errorCallBack) {
+    console.log('Sort by ' + key);
+    $.ajax({
+        url: apiBaseURL + "?sort=" + key,
+        type: 'GET',
+        contentType:'text/plain',
+        data:{},
+        success: Bookmarks => {  successCallBack(Bookmarks);
+                                console.log("webAPI_sortBookmark - success");},
+        error: function(jqXHR, textStatus, errorThrown) {
+            errorCallBack(errorThrown);
+            console.log("webAPI_sortBookmark - error");
+        }
+    });
+}
+function webAPI_searchIncomplete(name, successCallBack, errorCallBack) {
+    console.log('Search Name Incomplete' + name);
+    $.ajax({
+        url: apiBaseURL + "?name=" + name + '*',
+        type: 'GET',
+        contentType:'text/plain',
+        data:{},
+        success: Bookmarks => {  successCallBack(Bookmarks);
+                                console.log("webAPI_searchNameIncomplete - success");},
+        error: function(jqXHR, textStatus, errorThrown) {
+            errorCallBack(errorThrown);
+            console.log("webAPI_searchNameIncomplete - error");
+        }
+    });
+}
+
+function webAPI_searchName(name, successCallBack, errorCallBack) {
+    console.log('Search Name' + name);
+    $.ajax({
+        url: apiBaseURL + "?name=" + name,
+        type: 'GET',
+        contentType:'text/plain',
+        data:{},
+        success: Bookmarks => { successCallBack(Bookmarks);
+                                console.log("webAPI_searchName - success");            
+                            },
+        error: function(jqXHR, textStatus, errorThrown) {
+            errorCallBack(errorThrown);
+            console.log("webAPI_searchName - error");
+        }
+    });
+}
+function webAPI_searchCategory(category, successCallBack, errorCallBack) {
+    console.log('Search Category' + category);
+    $.ajax({
+        url: apiBaseURL + "?category=" + category,
+        type: 'GET',
+        contentType:'text/plain',
+        data:{},
+        success: Bookmarks => {  successCallBack(Bookmarks);
+                                console.log("webAPI_searchCategory - success");},
+        error: function(jqXHR, textStatus, errorThrown) {
+            errorCallBack(errorThrown);
+            console.log("webAPI_searchCategory - error");
+        }
+    });
+}
 function webAPI_addBookmark( Bookmark, successCallBack, errorCallBack) {
     console.log('add', Bookmark)
     $.ajax({
